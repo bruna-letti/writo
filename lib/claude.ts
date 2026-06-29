@@ -3,6 +3,11 @@ import { CefrLevel, LANGUAGES, LanguageCode } from './languages'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+function parseJsonResponse<T>(text: string): T {
+  const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '')
+  return JSON.parse(stripped)
+}
+
 export type PromptResult = {
   prompt_text: string
   prompt_type: string
@@ -71,7 +76,7 @@ Respond with ONLY valid JSON (no markdown):
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  return JSON.parse(text)
+  return parseJsonResponse<PromptResult>(text)
 }
 
 export async function getFeedback(
@@ -124,7 +129,7 @@ Respond with ONLY valid JSON (no markdown):
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  return JSON.parse(text)
+  return parseJsonResponse<FeedbackResult>(text)
 }
 
 export async function assessLevel(
@@ -169,7 +174,7 @@ Respond with ONLY valid JSON:
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  const result = JSON.parse(text)
+  const result = parseJsonResponse<{ should_update: boolean; new_level: CefrLevel; reason: string }>(text)
 
   if (!result.should_update || result.new_level === currentLevel) return null
   return { newLevel: result.new_level, reason: result.reason }
