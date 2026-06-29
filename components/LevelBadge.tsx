@@ -1,12 +1,12 @@
 import { CefrLevel, CEFR_DESCRIPTIONS } from '@/lib/languages'
 
 const levelColors: Record<CefrLevel, string> = {
-  A1: 'bg-slate-100 text-slate-600 border-slate-200',
-  A2: 'bg-blue-50 text-blue-600 border-blue-200',
-  B1: 'bg-teal-50 text-teal-700 border-teal-200',
-  B2: 'bg-violet-50 text-violet-700 border-violet-200',
-  C1: 'bg-amber-50 text-amber-700 border-amber-200',
-  C2: 'bg-rose-50 text-rose-700 border-rose-200',
+  A1: 'bg-[#EFEAE6] text-[#0C2C47]/70 border-[#0C2C47]/10',
+  A2: 'bg-[#97D3CD]/20 text-[#0C2C47] border-[#97D3CD]/50',
+  B1: 'bg-[#E4F2EA] text-[#2D5652] border-[#2D5652]/20',
+  B2: 'bg-[#E2A54D]/20 text-[#0C2C47] border-[#E2A54D]/50',
+  C1: 'bg-[#2D5652]/10 text-[#2D5652] border-[#2D5652]/30',
+  C2: 'bg-[#0C2C47]/10 text-[#0C2C47] border-[#0C2C47]/30',
 }
 
 export default function LevelBadge({

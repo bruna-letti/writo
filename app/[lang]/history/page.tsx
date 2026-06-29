@@ -33,12 +33,12 @@ export default async function HistoryPage({
 
   return (
     <div className="min-h-screen">
-      <header className={`bg-gradient-to-r ${language.gradient} text-white`}>
+      <header className={`bg-gradient-to-r ${language.gradient} ${language.headerText}`}>
         <div className="max-w-2xl mx-auto px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <Link
               href={`/${lang}`}
-              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+              className={`flex items-center gap-1.5 text-sm ${language.headerTextSoft} hover:opacity-100 transition-opacity`}
             >
               <ArrowLeft className="h-4 w-4" />
               Practice
@@ -50,12 +50,12 @@ export default async function HistoryPage({
                 <span className="text-2xl">{language.flag}</span>
                 <h1 className="text-2xl font-black">{language.name} — History</h1>
               </div>
-              <p className="text-white/70 text-sm">
+              <p className={`${language.headerTextSoft} text-sm`}>
                 {progress?.total_submissions ?? 0} total entries
               </p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 text-center">
-              <div className="text-xs text-white/70 mb-0.5">Level</div>
+            <div className={`${language.headerChip} backdrop-blur-sm rounded-xl px-3 py-2 text-center`}>
+              <div className={`text-xs ${language.headerTextSoft} mb-0.5`}>Level</div>
               <div className="text-2xl font-black">{progress?.cefr_level ?? 'A1'}</div>
             </div>
           </div>
@@ -65,8 +65,8 @@ export default async function HistoryPage({
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Level progression */}
         {levelHistory && levelHistory.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Level history</h2>
+          <div className="rounded-2xl border border-[#0C2C47]/10 bg-white p-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#0C2C47]/40 mb-3">Level history</h2>
             <div className="space-y-2">
               {levelHistory.map((entry: { id: string; from_level: CefrLevel | null; to_level: CefrLevel; reason: string; changed_at: string }) => (
                 <div key={entry.id} className="flex items-start gap-3 text-sm">
@@ -74,14 +74,14 @@ export default async function HistoryPage({
                     {entry.from_level && (
                       <>
                         <LevelBadge level={entry.from_level} size="sm" />
-                        <span className="text-slate-300">→</span>
+                        <span className="text-[#0C2C47]/30">→</span>
                       </>
                     )}
                     <LevelBadge level={entry.to_level} size="sm" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-slate-600 truncate">{entry.reason}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-[#0C2C47]/70 truncate">{entry.reason}</p>
+                    <p className="text-xs text-[#0C2C47]/40 mt-0.5">
                       {format(new Date(entry.changed_at), 'MMM d, yyyy')}
                     </p>
                   </div>

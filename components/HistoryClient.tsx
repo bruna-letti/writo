@@ -56,63 +56,63 @@ export default function HistoryClient({ langCode }: { langCode: string }) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-500 animate-spin" />
+        <div className="h-6 w-6 rounded-full border-2 border-[#0C2C47]/15 border-t-[#0C2C47]/60 animate-spin" />
       </div>
     )
   }
 
   if (submissions.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-        <p className="text-slate-400">No submissions yet. Start practicing!</p>
+      <div className="rounded-2xl border border-[#0C2C47]/10 bg-white p-8 text-center">
+        <p className="text-[#0C2C47]/40">No submissions yet. Start practicing!</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-[#0C2C47]/40">
         Submissions ({total})
       </h2>
 
       {submissions.map((sub) => {
         const isOpen = expanded === sub.id
         return (
-          <div key={sub.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div key={sub.id} className="rounded-2xl border border-[#0C2C47]/10 bg-white overflow-hidden">
             {/* Header row */}
             <button
               onClick={() => setExpanded(isOpen ? null : sub.id)}
-              className="w-full flex items-start gap-3 p-4 text-left hover:bg-slate-50 transition-colors"
+              className="w-full flex items-start gap-3 p-4 text-left hover:bg-[#EFEAE6]/40 transition-colors"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-xs font-medium text-slate-400">
+                  <span className="text-xs font-medium text-[#0C2C47]/40">
                     {format(new Date(sub.created_at), 'MMM d, yyyy')}
                   </span>
-                  <span className="text-slate-200">·</span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-[#0C2C47]/20">·</span>
+                  <span className="text-xs text-[#0C2C47]/40">
                     {promptTypeLabel[sub.prompts?.prompt_type] ?? sub.prompts?.prompt_type}
                   </span>
                   <LevelBadge level={sub.estimated_level} size="sm" />
-                  <span className="text-xs text-slate-400">{sub.score}/100</span>
+                  <span className="text-xs text-[#0C2C47]/40">{sub.score}/100</span>
                 </div>
-                <p className="text-sm text-slate-600 font-medium truncate">
+                <p className="text-sm text-[#0C2C47]/70 font-medium truncate">
                   {sub.prompts?.prompt_text}
                 </p>
-                <p className="text-sm text-slate-500 truncate mt-0.5">{sub.user_text}</p>
+                <p className="text-sm text-[#0C2C47]/50 truncate mt-0.5">{sub.user_text}</p>
               </div>
-              <div className="shrink-0 text-slate-300 mt-1">
+              <div className="shrink-0 text-[#0C2C47]/25 mt-1">
                 {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </div>
             </button>
 
             {/* Expanded content */}
             {isOpen && (
-              <div className="border-t border-slate-100 p-4 space-y-4">
+              <div className="border-t border-[#0C2C47]/5 p-4 space-y-4">
                 {/* Their writing */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Your writing</p>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-slate-50 rounded-xl p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0C2C47]/40 mb-2">Your writing</p>
+                  <p className="text-sm text-[#0C2C47]/80 whitespace-pre-wrap leading-relaxed bg-[#EFEAE6]/40 rounded-xl p-3">
                     {sub.user_text}
                   </p>
                 </div>
@@ -120,7 +120,7 @@ export default function HistoryClient({ langCode }: { langCode: string }) {
                 {sub.prompts?.target_words && sub.prompts.target_words.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {sub.prompts.target_words.map((w) => (
-                      <span key={w} className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-mono text-slate-600">
+                      <span key={w} className="rounded-lg bg-[#0C2C47]/5 px-2.5 py-1 text-xs font-mono text-[#0C2C47]/70">
                         {w}
                       </span>
                     ))}
@@ -140,15 +140,15 @@ export default function HistoryClient({ langCode }: { langCode: string }) {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="text-sm text-slate-500 hover:text-slate-800 disabled:opacity-30 transition"
+            className="text-sm text-[#0C2C47]/50 hover:text-[#0C2C47] disabled:opacity-30 transition"
           >
             ← Older
           </button>
-          <span className="text-xs text-slate-400">Page {page}</span>
+          <span className="text-xs text-[#0C2C47]/40">Page {page}</span>
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={page * 10 >= total}
-            className="text-sm text-slate-500 hover:text-slate-800 disabled:opacity-30 transition"
+            className="text-sm text-[#0C2C47]/50 hover:text-[#0C2C47] disabled:opacity-30 transition"
           >
             Newer →
           </button>

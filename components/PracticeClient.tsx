@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { CefrLevel } from '@/lib/languages'
 import { FeedbackResult } from '@/lib/claude'
 import FeedbackDisplay from './FeedbackDisplay'
 import LevelBadge from './LevelBadge'
-import { Send, RefreshCw, Sparkles, ArrowUpCircle } from 'lucide-react'
+import { Send, Sparkles, ArrowUpCircle } from 'lucide-react'
 
 type Prompt = {
   id: string
@@ -18,11 +18,9 @@ type Prompt = {
 
 type Props = {
   langCode: string
-  cefrLevel: CefrLevel
-  totalSubmissions: number
 }
 
-export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }: Props) {
+export default function PracticeClient({ langCode }: Props) {
   const [prompt, setPrompt] = useState<Prompt | null>(null)
   const [loadingPrompt, setLoadingPrompt] = useState(true)
   const [text, setText] = useState('')
@@ -30,39 +28,33 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null)
   const [levelUpdate, setLevelUpdate] = useState<{ newLevel: CefrLevel; reason: string } | null>(null)
   const [alreadyDone, setAlreadyDone] = useState(false)
-  const [currentLevel, setCurrentLevel] = useState<CefrLevel>(cefrLevel)
 
-  const fetchPrompt = useCallback(async () => {
-    setLoadingPrompt(true)
-    try {
-      const res = await fetch(`/api/prompt?lang=${langCode}`)
-      const data = await res.json()
-      setPrompt(data)
-    } finally {
-      setLoadingPrompt(false)
-    }
-  }, [langCode])
-
+  // Load today's prompt, then check whether it's already been answered
+  // (matched by prompt id, not by date, so this is immune to timezone drift
+  // between the browser and the Brasilia-time day boundary used server-side).
   useEffect(() => {
-    fetchPrompt()
-  }, [fetchPrompt])
+    async function init() {
+      setLoadingPrompt(true)
+      try {
+        const promptRes = await fetch(`/api/prompt?lang=${langCode}`)
+        const promptData = await promptRes.json()
+        setPrompt(promptData)
 
-  // Check if already submitted today
-  useEffect(() => {
-    async function checkToday() {
-      const res = await fetch(`/api/history?lang=${langCode}&page=1`)
-      const data = await res.json()
-      if (data.submissions?.length > 0) {
-        const latest = data.submissions[0]
-        const latestDate = new Date(latest.created_at).toDateString()
-        if (latestDate === new Date().toDateString()) {
+        const historyRes = await fetch(`/api/history?lang=${langCode}&page=1`)
+        const historyData = await historyRes.json()
+        const match = historyData.submissions?.find(
+          (s: { prompts?: { id: string } }) => s.prompts?.id === promptData.id
+        )
+        if (match) {
           setAlreadyDone(true)
-          setFeedback(latest.feedback)
-          setText(latest.user_text)
+          setFeedback(match.feedback)
+          setText(match.user_text)
         }
+      } finally {
+        setLoadingPrompt(false)
       }
     }
-    checkToday()
+    init()
   }, [langCode])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,7 +73,6 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
       setAlreadyDone(true)
       if (data.levelUpdate) {
         setLevelUpdate(data.levelUpdate)
-        setCurrentLevel(data.levelUpdate.newLevel)
       }
     } finally {
       setSubmitting(false)
@@ -101,8 +92,8 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
   if (loadingPrompt) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <div className="h-8 w-8 rounded-full border-2 border-slate-300 border-t-slate-700 animate-spin" />
-        <p className="text-sm text-slate-400">Preparing today's prompt…</p>
+        <div className="h-8 w-8 rounded-full border-2 border-[#0C2C47]/15 border-t-[#0C2C47] animate-spin" />
+        <p className="text-sm text-[#0C2C47]/40">Preparing today's prompt…</p>
       </div>
     )
   }
@@ -111,11 +102,11 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
     <div className="space-y-5">
       {/* Level update banner */}
       {levelUpdate && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <ArrowUpCircle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-[#E2A54D]/40 bg-[#E2A54D]/15 p-4">
+          <ArrowUpCircle className="h-5 w-5 text-[#E2A54D] mt-0.5 shrink-0" />
           <div>
-            <p className="font-semibold text-amber-800">Level up!</p>
-            <p className="text-sm text-amber-700 mt-0.5">
+            <p className="font-semibold text-[#0C2C47]">Level up!</p>
+            <p className="text-sm text-[#0C2C47]/70 mt-0.5">
               You've been promoted to <strong>{levelUpdate.newLevel}</strong>. {levelUpdate.reason}
             </p>
           </div>
@@ -124,25 +115,25 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
 
       {/* Prompt card */}
       {prompt && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#0C2C47]/10 bg-white p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-slate-400" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <Sparkles className="h-4 w-4 text-[#0C2C47]/30" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#0C2C47]/40">
                 Today's prompt · {promptTypeLabel[prompt.prompt_type] ?? prompt.prompt_type}
               </span>
             </div>
             <LevelBadge level={prompt.difficulty} size="sm" />
           </div>
 
-          <p className="text-slate-800 text-base leading-relaxed font-medium">{prompt.prompt_text}</p>
+          <p className="text-[#0C2C47] text-base leading-relaxed font-medium">{prompt.prompt_text}</p>
 
           {prompt.target_words && prompt.target_words.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {prompt.target_words.map((word) => (
                 <span
                   key={word}
-                  className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm font-mono text-slate-700"
+                  className="rounded-lg bg-[#0C2C47]/5 px-2.5 py-1 text-sm font-mono text-[#0C2C47]/80"
                 >
                   {word}
                 </span>
@@ -151,7 +142,7 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
           )}
 
           {prompt.instructions && (
-            <p className="mt-2 text-sm text-slate-500 italic">{prompt.instructions}</p>
+            <p className="mt-2 text-sm text-[#0C2C47]/50 italic">{prompt.instructions}</p>
           )}
         </div>
       )}
@@ -164,12 +155,12 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
             onChange={(e) => setText(e.target.value)}
             placeholder="Write your response here…"
             rows={7}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-slate-300 transition resize-none shadow-sm"
+            className="w-full rounded-2xl border border-[#0C2C47]/10 bg-white px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#97D3CD] transition resize-none shadow-sm"
           />
           <button
             type="submit"
             disabled={submitting || !text.trim()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 transition"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0C2C47] py-3 text-sm font-semibold text-white hover:bg-[#0C2C47]/90 disabled:opacity-50 transition"
           >
             {submitting ? (
               <>
@@ -185,10 +176,10 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
           </button>
         </form>
       ) : (
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Your writing</p>
-          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{text}</p>
-          <p className="mt-3 text-xs text-slate-400">
+        <div className="rounded-xl border border-[#0C2C47]/5 bg-[#EFEAE6]/50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0C2C47]/40 mb-2">Your writing</p>
+          <p className="text-sm text-[#0C2C47]/80 whitespace-pre-wrap leading-relaxed">{text}</p>
+          <p className="mt-3 text-xs text-[#0C2C47]/40">
             Come back tomorrow for a new prompt.
           </p>
         </div>
@@ -197,7 +188,7 @@ export default function PracticeClient({ langCode, cefrLevel, totalSubmissions }
       {/* Feedback */}
       {feedback && (
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">Feedback</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[#0C2C47]/50 mb-3">Feedback</h2>
           <FeedbackDisplay feedback={feedback} />
         </div>
       )}

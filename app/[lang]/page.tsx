@@ -29,19 +29,19 @@ export default async function LanguagePage({
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className={`bg-gradient-to-r ${language.gradient} text-white`}>
+      <header className={`bg-gradient-to-r ${language.gradient} ${language.headerText}`}>
         <div className="max-w-2xl mx-auto px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+              className={`flex items-center gap-1.5 text-sm ${language.headerTextSoft} hover:opacity-100 transition-opacity`}
             >
               <ArrowLeft className="h-4 w-4" />
               Dashboard
             </Link>
             <Link
               href={`/${lang}/history`}
-              className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+              className={`flex items-center gap-1.5 text-sm ${language.headerTextSoft} hover:opacity-100 transition-opacity`}
             >
               <History className="h-4 w-4" />
               History
@@ -54,13 +54,13 @@ export default async function LanguagePage({
                 <span className="text-2xl">{language.flag}</span>
                 <h1 className="text-2xl font-black">{language.name}</h1>
               </div>
-              <p className="text-white/70 text-sm">with {language.persona}</p>
+              <p className={`${language.headerTextSoft} text-sm`}>with {language.persona}</p>
             </div>
             <div className="text-right">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2">
-                <div className="text-xs text-white/70 mb-0.5">Your level</div>
+              <div className={`${language.headerChip} backdrop-blur-sm rounded-xl px-3 py-2`}>
+                <div className={`text-xs ${language.headerTextSoft} mb-0.5`}>Your level</div>
                 <div className="text-xl font-black">{cefrLevel}</div>
-                <div className="text-xs text-white/70">{CEFR_DESCRIPTIONS[cefrLevel]}</div>
+                <div className={`text-xs ${language.headerTextSoft}`}>{CEFR_DESCRIPTIONS[cefrLevel]}</div>
               </div>
             </div>
           </div>
@@ -69,11 +69,7 @@ export default async function LanguagePage({
 
       {/* Practice area */}
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <PracticeClient
-          langCode={lang}
-          cefrLevel={cefrLevel}
-          totalSubmissions={progress?.total_submissions ?? 0}
-        />
+        <PracticeClient langCode={lang} />
       </main>
     </div>
   )

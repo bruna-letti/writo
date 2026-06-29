@@ -40,11 +40,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-[#0C2C47]/10 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">Writo</h1>
-            <p className="text-xs text-slate-400">Daily language practice</p>
+            <h1 className="text-xl font-black text-[#0C2C47] tracking-tight">Writo</h1>
+            <p className="text-xs text-[#0C2C47]/40">Daily language practice</p>
           </div>
           <LogoutButton />
         </div>
@@ -52,14 +52,14 @@ export default async function DashboardPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-[#0C2C47]">
             {doneCount === LANGUAGE_CODES.length
               ? 'All done today!'
               : doneCount > 0
               ? `${doneCount} of ${LANGUAGE_CODES.length} done today`
               : "What are we writing today?"}
           </h2>
-          <p className="mt-1 text-slate-500 text-sm">
+          <p className="mt-1 text-[#0C2C47]/50 text-sm">
             {doneCount === LANGUAGE_CODES.length
               ? 'Come back tomorrow for new prompts.'
               : 'Pick a language and write with your AI partner.'}

@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { generatePrompt } from '@/lib/claude'
 import { getLanguage, LanguageCode } from '@/lib/languages'
-import { formatInTimeZone } from 'date-fns-tz'
-
-function getBrasiliaDate() {
-  return formatInTimeZone(new Date(), 'America/Sao_Paulo', 'yyyy-MM-dd')
-}
+import { getBrasiliaDate } from '@/lib/date'
 
 export async function GET(request: NextRequest) {
   const lang = request.nextUrl.searchParams.get('lang') as LanguageCode
