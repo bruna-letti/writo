@@ -1,65 +1,87 @@
-import Image from "next/image";
+export const dynamic = 'force-dynamic'
 
-export default function Home() {
+import { createServiceClient } from '@/lib/supabase/server'
+import { LANGUAGE_CODES, LANGUAGES, CefrLevel } from '@/lib/languages'
+import LanguageCard from '@/components/LanguageCard'
+import LogoutButton from '@/components/LogoutButton'
+import { formatInTimeZone } from 'date-fns-tz'
+
+type LanguageProgress = {
+  language: string
+  cefr_level: CefrLevel
+  total_submissions: number
+  current_streak: number
+  last_submission_date: string | null
+}
+
+async function getProgress() {
+  const supabase = createServiceClient()
+  const today = formatInTimeZone(new Date(), 'America/Sao_Paulo', 'yyyy-MM-dd')
+
+  const [{ data: progress }, { data: todaySubmissions }] = await Promise.all([
+    supabase.from('language_progress').select('*').in('language', LANGUAGE_CODES),
+    supabase.from('submissions').select('language').gte('created_at', `${today}T00:00:00`),
+  ])
+
+  const progressMap = Object.fromEntries(
+    ((progress as LanguageProgress[]) ?? []).map((p) => [p.language, p])
+  )
+  const doneTodaySet = new Set(
+    ((todaySubmissions as { language: string }[]) ?? []).map((s) => s.language)
+  )
+
+  return { progressMap, doneTodaySet }
+}
+
+export default async function DashboardPage() {
+  const { progressMap, doneTodaySet } = await getProgress()
+
+  const doneCount = LANGUAGE_CODES.filter((c) => doneTodaySet.has(c)).length
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">Writo</h1>
+            <p className="text-xs text-slate-400">Daily language practice</p>
+          </div>
+          <LogoutButton />
+        </div>
+      </header>
+
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">
+            {doneCount === LANGUAGE_CODES.length
+              ? 'All done today!'
+              : doneCount > 0
+              ? `${doneCount} of ${LANGUAGE_CODES.length} done today`
+              : "What are we writing today?"}
+          </h2>
+          <p className="mt-1 text-slate-500 text-sm">
+            {doneCount === LANGUAGE_CODES.length
+              ? 'Come back tomorrow for new prompts.'
+              : 'Pick a language and write with your AI partner.'}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-2 gap-4">
+          {LANGUAGE_CODES.map((code) => {
+            const p = progressMap[code]
+            return (
+              <LanguageCard
+                key={code}
+                code={code}
+                level={(p?.cefr_level ?? 'A1') as CefrLevel}
+                streak={p?.current_streak ?? 0}
+                totalSubmissions={p?.total_submissions ?? 0}
+                doneToday={doneTodaySet.has(code)}
+              />
+            )
+          })}
         </div>
       </main>
     </div>
-  );
+  )
 }
