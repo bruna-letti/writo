@@ -52,3 +52,11 @@ CREATE INDEX IF NOT EXISTS idx_prompts_lang_date ON prompts(language, date);
 CREATE INDEX IF NOT EXISTS idx_submissions_lang ON submissions(language);
 CREATE INDEX IF NOT EXISTS idx_submissions_created ON submissions(created_at);
 CREATE INDEX IF NOT EXISTS idx_level_history_lang ON level_history(language);
+
+-- Writo is single-user and only ever accessed through our own server using the
+-- service role key (never the anon key from a browser), so Row Level Security
+-- adds no protection here and only blocks legitimate writes. Disable it.
+ALTER TABLE language_progress DISABLE ROW LEVEL SECURITY;
+ALTER TABLE prompts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE submissions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE level_history DISABLE ROW LEVEL SECURITY;
